@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pitch Perfect - Votre assistant de candidature</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .fade-in {
+            opacity: 0;
+        }
+        .slide-up {
+            transform: translateY(20px);
+        }
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .text-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .wave {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            overflow: hidden;
+            line-height: 0;
+        }
+        .wave svg {
+            position: relative;
+            display: block;
+            width: calc(100% + 1.3px);
+            height: 150px;
+        }
+        .wave .shape-fill {
+            fill: #FFFFFF;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <!-- Header -->
+    <header class="gradient-bg text-white relative overflow-hidden">
+        <div class="container mx-auto px-6 py-16 relative z-10 max-w-6xl lg:px-[20%]">
+            <div class="flex justify-between items-center">
+                <h1 class="text-3xl md:text-4xl font-bold flex items-center">
+                    <i class="fas fa-bullhorn mr-3"></i> Pitch Perfect
+                </h1>
+                <button id="theme-toggle" class="p-2 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 transition">
+                    <i class="fas fa-moon text-white"></i>
+                </button>
+            </div>
+            <div class="mt-12 md:mt-20 text-center">
+                <h2 class="text-4xl md:text-6xl font-bold mb-6">Votre assistant de <span class="text-yellow-300">candidature</span> intelligent</h2>
+                <p class="text-xl md:text-2xl opacity-90 max-w-3xl mx-auto">Sauvegardez votre profil, générez des lettres de motivation personnalisées et maximisez vos probabilités de décrocher l'emploi de vos rêves.</p>
+            </div>
+        </div>
+        <!--
+        <div class="wave">
+            <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+                <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" class="shape-fill"></path>
+            </svg>
+        </div>
+        -->
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-6 py-12 max-w-6xl lg:px-[20%]">
+        <!-- Profile Section -->
+        <section id="profile-section" class="mb-16 fade-in slide-up">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-2xl md:text-3xl font-bold text-gray-800"><i class="fas fa-user-circle mr-2 text-purple-600"></i> Mon Profil</h2>
+                <button id="edit-profile" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition flex items-center">
+                    <i class="fas fa-edit mr-2"></i> <span id="edit-text">Modifier</span>
+                </button>
+            </div>
+            <div id="profile-view" class="bg-white rounded-xl shadow-md overflow-hidden card-hover p-6">
+                <p id="profile-summary" class="text-gray-700 mb-4">Cliquez sur "Modifier" pour configurer votre profil</p>
+                <div id="profile-skills" class="flex flex-wrap gap-2"></div>
+            </div>
+            <div id="profile-edit" class="bg-white rounded-xl shadow-md overflow-hidden card-hover hidden">
+                <div class="p-6">
+                    <div class="mb-6">
+                        <label for="profile-description" class="block text-gray-700 font-medium mb-2">Description personnelle</label>
+                        <textarea id="profile-description" rows="5" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent" placeholder="Décrivez-vous en quelques phrases..."></textarea>
+                    </div>
+                    <div class="mb-6">
+                        <label for="skills" class="block text-gray-700 font-medium mb-2">Compétences</label>
+                        <div class="flex flex-wrap gap-2 mb-3" id="skills-container"></div>
+                        <div class="flex">
+                            <input type="text" id="skill-input" class="flex-grow px-4 py-2 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent" placeholder="Ajouter une compétence">
+                            <button id="add-skill" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-r-lg transition">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="email" class="block text-gray-700 font-medium mb-2">Email</label>
+                        <input type="email" id="email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent" placeholder="votre@email.com">
+                    </div>
+                    <div class="flex justify-end mt-4">
+                        <button id="save-profile" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition flex items-center">
+                            <i class="fas fa-save mr-2"></i> Sauvegarder
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Job Offer Section -->
+        <section id="job-section" class="mb-16 fade-in slide-up">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-2xl md:text-3xl font-bold text-gray-800"><i class="fas fa-briefcase mr-2 text-blue-600"></i> Offre d'emploi</h2>
+                <div class="flex space-x-2">
+                    <button id="clear-offer" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg transition flex items-center">
+                        <i class="fas fa-trash mr-2"></i> Effacer
+                    </button>
+                    <button id="save-offer" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition flex items-center">
+                        <i class="fas fa-save mr-2"></i> Sauvegarder
+                    </button>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-md overflow-hidden card-hover">
+                <div class="p-6">
+                    <div class="mb-6">
+                        <label for="job-title" class="block text-gray-700 font-medium mb-2">Intitulé du poste</label>
+                        <input type="text" id="job-title" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent" placeholder="Ex: Développeur Front-end">
+                    </div>
+                    <div class="mb-6">
+                        <label for="job-description" class="block text-gray-700 font-medium mb-2">Description de l'offre</label>
+                        <textarea id="job-description" rows="8" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent" placeholder="Copiez-collez ici l'offre d'emploi..."></textarea>
+                    </div>
+                    <div class="flex justify-end">
+                        <button id="generate-pitch" class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-3 rounded-lg transition flex items-center font-medium">
+                            <i class="fas fa-magic mr-2"></i> Générer ma lettre de motivation
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Loader -->
+        <div id="loader" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="bg-white p-8 rounded-lg shadow-xl text-center">
+                <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-600 mx-auto mb-4"></div>
+                <p class="text-gray-700 font-medium">Génération de votre lettre de motivation...</p>
+            </div>
+        </div>
+
+        
+        <section id="letter-section" class="mb-16 fade-in slide-up">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-2xl md:text-3xl font-bold text-gray-800"><i class="fas fa-envelope-open-text mr-2 text-indigo-600"></i> Lettre de motivation</h2>
+                <div class="flex space-x-2">
+                    <button id="copy-letter" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg transition flex items-center">
+                        <i class="fas fa-copy mr-2"></i> Copier
+                    </button>
+                    <button id="download-letter" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition flex items-center">
+                        <i class="fas fa-download mr-2"></i> Télécharger
+                    </button>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-md overflow-hidden card-hover">
+                <div class="p-6">
+                    <div id="letter-placeholder" class="text-center py-12 text-gray-400">
+                        <i class="fas fa-envelope fa-3x mb-4"></i>
+                        <p class="text-xl">Votre lettre de motivation personnalisée apparaîtra ici</p>
+                    </div>
+                    <div id="letter-content" class="hidden">
+                        <div class="mb-6">
+                            <input type="text" id="letter-title" class="w-full px-4 py-2 border-b border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-transparent text-xl font-bold" placeholder="Objet de la lettre">
+                        </div>
+                        <div id="letter-text" class="prose max-w-none">
+                            <!-- Generated letter will appear here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Saved Offers Section -->
+        <section id="saved-offers-section" class="fade-in slide-up">
+            <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-8"><i class="fas fa-archive mr-2 text-green-600"></i> Offres sauvegardées</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="saved-offers-container">
+                <!-- Saved offers will appear here -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto px-6 max-w-6xl lg:px-[20%]">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <h3 class="text-xl font-bold flex items-center">
+                        <i class="fas fa-bullhorn mr-2"></i> Pitch Perfect
+                    </h3>
+                    <p class="text-gray-400 mt-1">Votre assistant de candidature intelligent</p>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="#" class="text-gray-400 hover:text-white transition">
+                        <i class="fab fa-github fa-lg"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition">
+                        <i class="fab fa-twitter fa-lg"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition">
+                        <i class="fab fa-linkedin fa-lg"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-6 pt-6 text-center text-gray-400">
+                <p>&copy; 2023 Pitch Perfect. Tous droits réservés.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Success Notification -->
+    <div id="success-notification" class="fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg transform translate-y-20 transition-transform duration-300 flex items-center">
+        <i class="fas fa-check-circle mr-2"></i>
+        <span id="notification-message">Opération réussie !</span>
+    </div>
+
+    <script>
+        // Initialize GSAP animations
+        document.addEventListener('DOMContentLoaded', () => {
+            gsap.to('.fade-in', {
+                opacity: 1,
+                y: 0,
+                duration: 0.8,
+                stagger: 0.2,
+                ease: "power2.out"
+            });
+
+            // Theme toggle
+            const themeToggle = document.getElementById('theme-toggle');
+            themeToggle.addEventListener('click', () => {
+                document.documentElement.classList.toggle('dark');
+                const icon = themeToggle.querySelector('i');
+                if (document.documentElement.classList.contains('dark')) {
+                    icon.classList.remove('fa-moon');
+                    icon.classList.add('fa-sun');
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    icon.classList.remove('fa-sun');
+                    icon.classList.add('fa-moon');
+                    localStorage.setItem('theme', 'light');
+                }
+            });
+
+            // Check for saved theme
+            if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+                const icon = themeToggle.querySelector('i');
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            }
+        });
+
+        // Profile Management
+        document.addEventListener('DOMContentLoaded', () => {
+            const profileDescription = document.getElementById('profile-description');
+            const skillsContainer = document.getElementById('skills-container');
+            const skillInput = document.getElementById('skill-input');
+            const addSkillBtn = document.getElementById('add-skill');
+            const emailInput = document.getElementById('email');
+            const saveProfileBtn = document.getElementById('save-profile');
+
+            // Load saved profile
+            const savedProfile = localStorage.getItem('pitchPerfectProfile');
+            if (savedProfile) {
+                const profile = JSON.parse(savedProfile);
+                profileDescription.value = profile.description || '';
+                emailInput.value = profile.email || '';
+                
+                if (profile.skills && profile.skills.length > 0) {
+                    profile.skills.forEach(skill => {
+                        addSkillToDOM(skill);
+                    });
+                }
+            }
+
+            // Add skill
+            addSkillBtn.addEventListener('click', () => {
+                const skill = skillInput.value.trim();
+                if (skill) {
+                    addSkillToDOM(skill);
+                    skillInput.value = '';
+                }
+            });
+
+            skillInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    const skill = skillInput.value.trim();
+                    if (skill) {
+                        addSkillToDOM(skill);
+                        skillInput.value = '';
+                    }
+                }
+            });
+
+            function addSkillToDOM(skill) {
+                const skillElement = document.createElement('div');
+                skillElement.className = 'bg-purple-100 text-purple-800 px-3 py-1 rounded-full flex items-center';
+                skillElement.innerHTML = `
+                    ${skill}
+                    <button class="ml-2 text-purple-600 hover:text-purple-800">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                
+                const deleteBtn = skillElement.querySelector('button');
+                deleteBtn.addEventListener('click', () => {
+                    skillsContainer.removeChild(skillElement);
+                });
+                
+                skillsContainer.appendChild(skillElement);
+            }
+
+            // Edit profile toggle
+            const editProfileBtn = document.getElementById('edit-profile');
+            const profileView = document.getElementById('profile-view');
+            const profileEdit = document.getElementById('profile-edit');
+            const profileSummary = document.getElementById('profile-summary');
+            const profileSkills = document.getElementById('profile-skills');
+
+            editProfileBtn.addEventListener('click', () => {
+                const isEditing = !profileEdit.classList.contains('hidden');
+                
+                if (isEditing) {
+                    profileView.classList.remove('hidden');
+                    profileEdit.classList.add('hidden');
+                    editProfileBtn.querySelector('i').className = 'fas fa-edit mr-2';
+                    document.getElementById('edit-text').textContent = 'Modifier';
+                } else {
+                    profileView.classList.add('hidden');
+                    profileEdit.classList.remove('hidden');
+                    editProfileBtn.querySelector('i').className = 'fas fa-eye mr-2';
+                    document.getElementById('edit-text').textContent = 'Voir';
+                }
+            });
+
+            // Save profile
+            saveProfileBtn.addEventListener('click', () => {
+                const skills = Array.from(skillsContainer.children).map(skillEl => {
+                    return skillEl.textContent.trim().replace('×', '').trim();
+                });
+                
+                const profile = {
+                    description: profileDescription.value,
+                    skills: skills,
+                    email: emailInput.value
+                };
+
+                const _profile = {
+                    description: profileDescription.value,
+                    skills: skills,
+                };
+
+                fetch("/profile", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(_profile)
+                })
+                .then(res => res.json())
+                .then(data => {
+                    console.log("Réponse du serveur :", data);
+                });
+                
+                localStorage.setItem('pitchPerfectProfile', JSON.stringify(profile));
+                
+                // Update profile view
+                profileSummary.textContent = profile.description || 'Aucune description';
+                profileSkills.innerHTML = '';
+                profile.skills.forEach(skill => {
+                    const skillEl = document.createElement('span');
+                    skillEl.className = 'bg-purple-100 text-purple-800 px-3 py-1 rounded-full';
+                    skillEl.textContent = skill;
+                    profileSkills.appendChild(skillEl);
+                });
+                
+                profileView.classList.remove('hidden');
+                profileEdit.classList.add('hidden');
+                editProfileBtn.querySelector('i').className = 'fas fa-edit mr-2';
+                document.getElementById('edit-text').textContent = 'Modifier';
+                showNotification('Profil sauvegardé avec succès !');
+            });
+
+            // Load profile view
+            if (savedProfile) {
+                const profile = JSON.parse(savedProfile);
+                profileSummary.textContent = profile.description || 'Aucune description';
+                profile.skills.forEach(skill => {
+                    const skillEl = document.createElement('span');
+                    skillEl.className = 'bg-purple-100 text-purple-800 px-3 py-1 rounded-full';
+                    skillEl.textContent = skill;
+                    profileSkills.appendChild(skillEl);
+                });
+            }
+        });
+
+        // Job Offer Management
+        document.addEventListener('DOMContentLoaded', () => {
+            const jobTitle = document.getElementById('job-title');
+            const jobDescription = document.getElementById('job-description');
+            const saveOfferBtn = document.getElementById('save-offer');
+            const clearOfferBtn = document.getElementById('clear-offer');
+            const generatePitchBtn = document.getElementById('generate-pitch');
+            const savedOffersContainer = document.getElementById('saved-offers-container');
+
+            // Load saved offers
+            const savedOffers = JSON.parse(localStorage.getItem('pitchPerfectOffers') || '[]');
+            renderSavedOffers(savedOffers);
+
+            // Save offer
+            saveOfferBtn.addEventListener('click', () => {
+                if (!jobTitle.value.trim() || !jobDescription.value.trim()) {
+                    showNotification('Veuillez remplir tous les champs', 'error');
+                    return;
+                }
+
+                const offers = JSON.parse(localStorage.getItem('pitchPerfectOffers') || '[]');
+                const newOffer = {
+                    id: Date.now(),
+                    title: jobTitle.value.trim(),
+                    description: jobDescription.value.trim(),
+                    date: new Date().toLocaleDateString()
+                };
+
+                offers.unshift(newOffer);
+                localStorage.setItem('pitchPerfectOffers', JSON.stringify(offers));
+                renderSavedOffers(offers);
+                showNotification('Offre sauvegardée avec succès !');
+            });
+
+            // Clear offer
+            clearOfferBtn.addEventListener('click', () => {
+                jobTitle.value = '';
+                jobDescription.value = '';
+            });
+
+            // Generate pitch
+            generatePitchBtn.addEventListener('click', () => {
+                const profile = JSON.parse(localStorage.getItem('pitchPerfectProfile') || '{}');
+                if (!profile.description || !profile.skills || profile.skills.length === 0 || !profile.email) {
+                    showNotification('Veuillez compléter votre profil d\'abord', 'error');
+                    return;
+                }
+
+                if (!jobTitle.value.trim() || !jobDescription.value.trim()) {
+                    showNotification('Veuillez saisir une offre d\'emploi', 'error');
+                    return;
+                }
+
+                const savedProfile = JSON.parse(localStorage.getItem('pitchPerfectProfile'));
+
+                const job = {
+                    title: jobTitle.value.trim(),
+                    description: jobDescription.value.trim(),
+                    profile : savedProfile["description"],
+                    skills: savedProfile["skills"],
+                    email : savedProfile["email"]
+                };
+
+                // Show loader
+                document.getElementById('loader').classList.remove('hidden');
+
+                fetch("/job", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(job)
+                })
+                .then(res => res.json())
+                .then(data => {
+                    console.log("✅ Réponse serveur :", data);
+                    document.getElementById('letter-placeholder').classList.add('hidden');
+                    document.getElementById('letter-content').classList.remove('hidden');
+                    document.getElementById('letter-text').innerHTML = data.data.message;
+                    document.getElementById('letter-title').value = `${data.data.objet}`;
+
+                    document.getElementById('loader').classList.add('hidden');
+
+                    showNotification('Lettre de motivation générée avec succès !');
+                });
+
+                // Simulate API call
+                /*setTimeout(() => {
+                    const letterContent = generateMotivationLetter(profile, {
+                        title: jobTitle.value.trim(),
+                        description: jobDescription.value.trim()
+                    });
+
+                    document.getElementById('letter-placeholder').classList.add('hidden');
+                    document.getElementById('letter-content').classList.remove('hidden');
+                    document.getElementById('letter-text').innerHTML = letterContent;
+                    document.getElementById('letter-title').value = `Candidature pour le poste de ${jobTitle.value.trim()}`;
+
+                    showNotification('Lettre de motivation générée avec succès !');
+                }, 1000);*/
+            });
+
+            function renderSavedOffers(offers) {
+                savedOffersContainer.innerHTML = '';
+                
+                if (offers.length === 0) {
+                    savedOffersContainer.innerHTML = `
+                        <div class="col-span-full text-center py-8 text-gray-500">
+                            <i class="fas fa-inbox fa-3x mb-4"></i>
+                            <p class="text-lg">Aucune offre sauvegardée pour le moment</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                offers.forEach(offer => {
+                    const offerEl = document.createElement('div');
+                    offerEl.className = 'bg-white rounded-lg shadow-md overflow-hidden card-hover';
+                    offerEl.innerHTML = `
+                        <div class="p-6">
+                            <h3 class="text-xl font-bold text-gray-800 mb-2 truncate">${offer.title}</h3>
+                            <p class="text-gray-500 text-sm mb-4">Sauvegardé le ${offer.date}</p>
+                            <div class="flex justify-between items-center">
+                                <button class="text-blue-600 hover:text-blue-800 view-offer" data-id="${offer.id}">
+                                    <i class="fas fa-eye mr-1"></i> Voir
+                                </button>
+                                <button class="text-red-600 hover:text-red-800 delete-offer" data-id="${offer.id}">
+                                    <i class="fas fa-trash mr-1"></i> Supprimer
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    savedOffersContainer.appendChild(offerEl);
+                });
+
+                // Add event listeners
+                document.querySelectorAll('.view-offer').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const offerId = parseInt(btn.getAttribute('data-id'));
+                        const offers = JSON.parse(localStorage.getItem('pitchPerfectOffers') || '[]');
+                        const offer = offers.find(o => o.id === offerId);
+                        
+                        if (offer) {
+                            jobTitle.value = offer.title;
+                            jobDescription.value = offer.description;
+                            window.scrollTo({
+                                top: document.getElementById('job-section').offsetTop - 20,
+                                behavior: 'smooth'
+                            });
+                        }
+                    });
+                });
+
+                document.querySelectorAll('.delete-offer').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const offerId = parseInt(btn.getAttribute('data-id'));
+                        const offers = JSON.parse(localStorage.getItem('pitchPerfectOffers') || '[]');
+                        const filteredOffers = offers.filter(o => o.id !== offerId);
+                        
+                        localStorage.setItem('pitchPerfectOffers', JSON.stringify(filteredOffers));
+                        renderSavedOffers(filteredOffers);
+                        showNotification('Offre supprimée avec succès');
+                    });
+                });
+            }
+
+            function generateMotivationLetter(profile, job) {
+                // This is a simplified version - in a real app, you'd call an API
+                const skillsList = profile.skills.map(skill => `<li>${skill}</li>`).join('');
+                
+                return `
+                    <p>Madame, Monsieur,</p>
+                    
+                    <p>Actuellement à la recherche d'un nouveau challenge professionnel, je me permets de vous adresser ma candidature pour le poste de ${job.title} au sein de votre entreprise.</p>
+                    
+                    <p>${profile.description}</p>
+                    
+                    <p>Mes compétences principales sont :</p>
+                    <ul>${skillsList}</ul>
+                    
+                    <p>En parcourant votre offre d'emploi, j'ai été particulièrement intéressé(e) par les aspects suivants :</p>
+                    <p>${extractKeyPoints(job.description)}</p>
+                    
+                    <p>Je suis convaincu(e) que mon profil correspond aux attentes que vous avez exprimées et je serais ravi(e) d'échanger avec vous pour vous détailler comment mes compétences pourraient contribuer à votre entreprise.</p>
+                    
+                    <p>Dans l'attente de votre retour, je reste à votre disposition pour toute information complémentaire et disponible pour un entretien à votre convenance.</p>
+                    
+                    <p>Je vous prie d'agréer, Madame, Monsieur, l'expression de mes salutations distinguées.</p>
+                    
+                    <p>Cordialement,</p>
+                    <p>[Votre Nom]</p>
+                    <p>${profile.email}</p>
+                `;
+            }
+
+            function extractKeyPoints(text) {
+                // Simple extraction - in reality you'd use NLP or more complex parsing
+                const sentences = text.split(/[.!?]\s/).filter(s => s.length > 0);
+                const selected = sentences.slice(0, Math.min(3, sentences.length));
+                return selected.map(s => s.trim()).join('. ') + (selected.length > 0 ? '.' : '');
+            }
+        });
+
+        // Letter Management
+        document.addEventListener('DOMContentLoaded', () => {
+            const copyLetterBtn = document.getElementById('copy-letter');
+            const downloadLetterBtn = document.getElementById('download-letter');
+
+            copyLetterBtn.addEventListener('click', () => {
+                const letterText = document.getElementById('letter-text').textContent;
+                if (!letterText.trim()) {
+                    showNotification('Aucune lettre à copier', 'error');
+                    return;
+                }
+
+                navigator.clipboard.writeText(letterText).then(() => {
+                    showNotification('Lettre copiée dans le presse-papiers !');
+                }).catch(err => {
+                    showNotification('Erreur lors de la copie', 'error');
+                    console.error('Failed to copy: ', err);
+                });
+            });
+
+            downloadLetterBtn.addEventListener('click', () => {
+                const letterText = document.getElementById('letter-text').textContent;
+                if (!letterText.trim()) {
+                    showNotification('Aucune lettre à télécharger', 'error');
+                    return;
+                }
+
+                const title = document.getElementById('letter-title').value || 'Lettre de motivation';
+                const blob = new Blob([letterText], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${title}.txt`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                showNotification('Lettre téléchargée avec succès !');
+            });
+        });
+
+        // Notification system
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('success-notification');
+            const notificationMsg = document.getElementById('notification-message');
+            
+            notificationMsg.textContent = message;
+            
+            if (type === 'error') {
+                notification.classList.remove('bg-green-500');
+                notification.classList.add('bg-red-500');
+            } else {
+                notification.classList.remove('bg-red-500');
+                notification.classList.add('bg-green-500');
+            }
+            
+            notification.style.transform = 'translateY(0)';
+            
+            setTimeout(() => {
+                notification.style.transform = 'translateY(100px)';
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
